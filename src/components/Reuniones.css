@@ -1,0 +1,497 @@
+/* Importar Bootstrap Icons */
+@import url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css');
+
+.reuniones-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8eef3 100%);
+}
+
+/* Header */
+.page-header {
+  animation: fadeInDown 0.6s ease;
+}
+
+.page-title {
+  color: #2c3e50;
+  font-weight: 700;
+  font-size: 2rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.page-subtitle {
+  color: #6c757d;
+  margin: 0.5rem 0 0 0;
+  font-size: 1rem;
+}
+
+.btn-add-reunion {
+  background: linear-gradient(135deg, #003a70 0%, #0075c9 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 58, 112, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-add-reunion:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 58, 112, 0.4);
+  background: linear-gradient(135deg, #002a50 0%, #005299 100%);
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Tabla */
+.table-section {
+  animation: fadeInUp 0.6s ease;
+}
+
+.table-container {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  border: none;
+}
+
+.reuniones-table thead {
+  background: linear-gradient(135deg, #003a70 0%, #0075c9 100%);
+}
+
+.reuniones-table thead th {
+  color: white;
+  font-weight: 600;
+  border: none;
+  padding: 1rem;
+  font-size: 0.95rem;
+}
+
+.reuniones-table tbody tr {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.reuniones-table tbody tr:hover {
+  background-color: #f0f8ff;
+  transform: scale(1.01);
+  box-shadow: 0 2px 8px rgba(0, 117, 201, 0.1);
+}
+
+.reuniones-table tbody td {
+  padding: 1rem;
+  vertical-align: middle;
+  color: #495057;
+  font-size: 0.95rem;
+}
+
+.fecha-col, .horario-col, .ubicacion-col {
+  font-weight: 500;
+}
+
+.tema-col {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.estado-badge {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Estado vacío */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.empty-icon {
+  font-size: 5rem;
+  color: #cbd5e0;
+  margin-bottom: 1.5rem;
+}
+
+.empty-title {
+  color: #2c3e50;
+  font-weight: 700;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.empty-description {
+  color: #6c757d;
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1040;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-ficha-reunion {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 20px;
+  width: 95%;
+  max-width: 1200px;
+  max-height: 90vh;
+  overflow-y: auto;
+  z-index: 1050;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.modal-header-custom {
+  background: linear-gradient(135deg, #003a70 0%, #0075c9 100%);
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 20px 20px 0 0;
+}
+
+.modal-title-custom {
+  color: white;
+  margin: 0;
+  font-weight: 700;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.btn-close-modal {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-close-modal i {
+  color: white;
+  font-size: 1.2rem;
+}
+
+.btn-close-modal:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+.modal-body-custom {
+  padding: 2rem;
+}
+
+/* Información de Reunión */
+.reunion-info-header {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border-left: 5px solid #0075c9;
+}
+
+.reunion-tema {
+  color: #003a70;
+  font-weight: 700;
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+.reunion-meta {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  color: #6c757d;
+  font-weight: 500;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+/* Imagen de la Reunión */
+.imagen-section {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.section-title {
+  color: #003a70;
+  font-weight: 700;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.imagen-container {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.imagen-reunion {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.imagen-info {
+  background: white;
+  padding: 0.75rem;
+  text-align: center;
+  color: #28a745;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* Resumen de Asistencia */
+.resumen-asistencia {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.resumen-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.resumen-card {
+  background: white;
+  padding: 1.25rem;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.resumen-card.presente {
+  border-top: 4px solid #28a745;
+}
+
+.resumen-card.ausente {
+  border-top: 4px solid #dc3545;
+}
+
+.resumen-card.total {
+  border-top: 4px solid #0075c9;
+}
+
+.resumen-numero {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.resumen-label {
+  color: #6c757d;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+/* Listas de Personas */
+.asistencia-section, .ausencia-section {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.personas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.persona-item {
+  background: white;
+  padding: 1rem;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.3s ease;
+}
+
+.persona-item:hover {
+  transform: translateX(5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.presente-item {
+  border-left: 4px solid #28a745;
+}
+
+.ausente-item {
+  border-left: 4px solid #dc3545;
+}
+
+.persona-icon {
+  font-size: 1.5rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.presente-item .persona-icon {
+  background: #d4edda;
+  color: #28a745;
+}
+
+.ausente-item .persona-icon {
+  background: #f8d7da;
+  color: #dc3545;
+}
+
+.persona-info {
+  flex: 1;
+}
+
+.persona-nombre {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #2c3e50;
+  margin-bottom: 0.25rem;
+}
+
+.persona-detalle {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.persona-estado .badge {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Observaciones */
+.observaciones-section {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.observaciones-content {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  color: #495057;
+  line-height: 1.6;
+  border-left: 4px solid #0075c9;
+}
+
+.modal-footer-custom {
+  padding: 1.5rem 2rem;
+  background: #f8f9fa;
+  border-radius: 0 0 20px 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.modal-footer-custom .btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .page-header .d-flex {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+
+  .btn-add-reunion {
+    margin-top: 1rem;
+    width: 100%;
+  }
+
+  .modal-ficha-reunion {
+    width: 98%;
+  }
+
+  .modal-body-custom {
+    padding: 1rem;
+  }
+
+  .reunion-meta {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .resumen-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .table-responsive {
+    font-size: 0.85rem;
+  }
+
+  .reuniones-table tbody td {
+    padding: 0.75rem 0.5rem;
+  }
+}

@@ -1,0 +1,518 @@
+/* Importar Bootstrap Icons */
+@import url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css');
+
+.profesores-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8eef3 100%);
+}
+
+/* Header */
+.page-header {
+  animation: fadeInDown 0.6s ease;
+}
+
+.page-title {
+  color: #2c3e50;
+  font-weight: 700;
+  font-size: 2rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.page-subtitle {
+  color: #6c757d;
+  margin: 0.5rem 0 0 0;
+  font-size: 1rem;
+}
+
+.btn-add-profesor {
+  background: linear-gradient(135deg, #003a70 0%, #0075c9 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 58, 112, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-add-profesor:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 58, 112, 0.4);
+  background: linear-gradient(135deg, #002a50 0%, #005299 100%);
+}
+
+/* Grid de Profesores */
+.profesores-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+  animation: fadeInUp 0.6s ease;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Tarjeta de Profesor */
+.profesor-card {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.profesor-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15) !important;
+  border-color: #0075c9;
+}
+
+.profesor-foto-container {
+  position: relative;
+  height: 250px;
+  background: linear-gradient(135deg, #003a70 0%, #0075c9 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.profesor-foto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.foto-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 58, 112, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.foto-overlay i {
+  color: white;
+  font-size: 3rem;
+}
+
+.profesor-card:hover .foto-overlay {
+  opacity: 1;
+}
+
+.profesor-info {
+  padding: 1.5rem;
+}
+
+.profesor-nombre {
+  color: #2c3e50;
+  font-weight: 700;
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.profesor-facultad {
+  color: #6c757d;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.profesor-cubiculo-preview {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Estado vacío */
+.empty-state-profesores {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 16px;
+}
+
+.empty-icon {
+  font-size: 5rem;
+  color: #cbd5e0;
+  margin-bottom: 1.5rem;
+}
+
+.empty-title {
+  color: #2c3e50;
+  font-weight: 700;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.empty-description {
+  color: #6c757d;
+  font-size: 1.05rem;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1040;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-ficha {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 1000px;
+  max-height: 90vh;
+  overflow-y: auto;
+  z-index: 1050;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.modal-header-custom {
+  background: linear-gradient(135deg, #003a70 0%, #0075c9 100%);
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 20px 20px 0 0;
+}
+
+.modal-title-custom {
+  color: white;
+  margin: 0;
+  font-weight: 700;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.btn-close-modal {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-close-modal i {
+  color: white;
+  font-size: 1.2rem;
+}
+
+.btn-close-modal:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+.modal-body-custom {
+  padding: 2rem;
+}
+
+/* Ficha - Foto */
+.ficha-foto-container {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 5px solid #0075c9;
+  box-shadow: 0 8px 20px rgba(0, 117, 201, 0.3);
+}
+
+.ficha-foto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ficha-nombre {
+  color: #2c3e50;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.ficha-badge {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* Secciones de la ficha */
+.ficha-section {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.ficha-section-title {
+  color: #003a70;
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.ficha-data-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.ficha-data-row:last-child {
+  border-bottom: none;
+}
+
+.ficha-label {
+  color: #6c757d;
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+}
+
+.ficha-value {
+  color: #2c3e50;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.ficha-value-highlight {
+  color: #0075c9;
+  font-weight: 700;
+  font-size: 1.1rem;
+  background: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+}
+
+/* Estado de reconocimiento */
+.recognition-status {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: white;
+  border-radius: 8px;
+  font-weight: 500;
+  color: #2c3e50;
+  font-size: 0.9rem;
+}
+
+/* Horario Semanal */
+.horario-descripcion {
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1rem;
+  background: white;
+  border-radius: 8px;
+  border-left: 4px solid #0075c9;
+}
+
+.horario-semanal {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dia-horario {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.dia-horario:hover {
+  border-color: #0075c9;
+  box-shadow: 0 4px 12px rgba(0, 117, 201, 0.1);
+}
+
+.dia-header {
+  background: linear-gradient(135deg, #003a70 0%, #0075c9 100%);
+  color: white;
+  padding: 0.75rem 1.25rem;
+  font-weight: 700;
+  font-size: 1.05rem;
+  display: flex;
+  align-items: center;
+}
+
+.bloques-dia {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.bloque-horario {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.bloque-horario.disponible {
+  background: #e8f5e9;
+  border-left: 4px solid #28a745;
+  color: #155724;
+}
+
+.bloque-horario.disponible:hover {
+  background: #d4edda;
+  transform: translateX(5px);
+}
+
+.bloque-horario.no-disponible {
+  background: #f8d7da;
+  border-left: 4px solid #dc3545;
+  color: #721c24;
+}
+
+.horario-tiempo {
+  flex: 1;
+  font-size: 1rem;
+}
+
+.estado-badge {
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.estado-badge.presente {
+  background: #28a745;
+  color: white;
+}
+
+.estado-badge.ausente {
+  background: #dc3545;
+  color: white;
+}
+
+.modal-footer-custom {
+  padding: 1.5rem 2rem;
+  background: #f8f9fa;
+  border-radius: 0 0 20px 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.modal-footer-custom .btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .profesores-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .page-header .d-flex {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+
+  .btn-add-profesor {
+    margin-top: 1rem;
+    width: 100%;
+  }
+
+  .modal-ficha {
+    width: 95%;
+    max-height: 95vh;
+  }
+
+  .modal-body-custom {
+    padding: 1rem;
+  }
+
+  .ficha-foto-container {
+    width: 150px;
+    height: 150px;
+  }
+
+  .bloque-horario {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
