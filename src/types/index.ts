@@ -1,39 +1,35 @@
-import { ReactNode } from "react";
+// src/types/index.ts
 
+// ---- PROFESORES (ya los tenías) ----
 export interface Profesor {
-    _id: string;
-    titulo: string;
-    apellido: ReactNode;
-    id: string;
-    nombre: string;
+  id_usuario: string;
+  first_name: string;
+  second_name?: string;
+  surname1: string;
+  surname2?: string;
+  email: string;
+  rol_id?: string;
+  active: boolean;
 }
 
-export interface Reunion {
-    _id: string;
-    asistentes: any;
-    id: string;
-    titulo: string;
-    fecha: string;
-}
-
-// types.ts
-
+// ---- REUNIONES ----
 export interface AttendanceEntry {
   detected: boolean;
   timestamp: string | null;
-  name?: string; // opcional (por si luego guardas el nombre aqu�)
 }
 
 export interface Meeting {
   id: string;
   title: string;
   description?: string;
-  date?: string;         // "2024-01-14"
-  start_time?: string;   // "09:00" o "09:00:00"
-  end_time?: string;     // "11:00" o "11:00:00"
-  room?: string;
+  date: string;          // en backend es date, aquí lo tratamos como string
+  start_time: string;    // "09:00"
+  end_time: string;      // "11:00"
+  room: string;
   image_url?: string | null;
   observations?: string;
   active: boolean;
-  attendance: Record<string, AttendanceEntry>;
+  attendance: {
+    [userId: string]: AttendanceEntry;
+  };
 }

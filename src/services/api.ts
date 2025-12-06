@@ -1,3 +1,4 @@
+// src/services/api.ts
 import axios from "axios";
 
 export const api = axios.create({
@@ -7,8 +8,7 @@ export const api = axios.create({
   },
 });
 
-// ---------------------- PROFESORES (Usuarios con rol docente) ----------------------
-
+// ---------- PROFESORES ----------
 export const getProfesores = async () => {
   const res = await api.get("/users?rol=docente");
   return res.data;
@@ -30,24 +30,7 @@ export const deleteProfesor = async (id: string) => {
 };
 
 // ---------- REUNIONES ----------
-
 export const getReuniones = async () => {
   const res = await api.get("/meetings");
-  return res.data;
-};
-
-// Si luego quieres crear / editar / desactivar, los dejas ya listos:
-export const createReunion = async (data: any) => {
-  const res = await api.post("/meetings", data);
-  return res.data;
-};
-
-export const updateReunion = async (id: string, data: any) => {
-  const res = await api.put(`/meetings/${id}`, data);
-  return res.data;
-};
-
-export const deactivateReunion = async (id: string) => {
-  const res = await api.patch(`/meetings/${id}/deactivate`);
-  return res.data;
+  return res.data; // FastAPI te devuelve directamente el array de reuniones
 };
