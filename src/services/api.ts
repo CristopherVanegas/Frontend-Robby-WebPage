@@ -30,7 +30,7 @@ export const deleteProfesor = async (id: string) => {
 };
 
 // ---------- REUNIONES ----------
-export const getReuniones = async () => {
-  const res = await api.get("/meetings");
-  return res.data; // FastAPI te devuelve directamente el array de reuniones
+export const getReuniones = async (): Promise<Reunion[]> => {
+  const res = await api.get<Reunion[]>("/meetings");
+  return res.data;
 };

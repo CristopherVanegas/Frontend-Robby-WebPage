@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { getReuniones } from "../services/api";
 import { Meeting } from "../types";
+import "../components/Reuniones.css";
+// ajusta la ruta según dónde esté el archivo
 
 const Reuniones: React.FC = () => {
   const [reuniones, setReuniones] = useState<Meeting[]>([]);

@@ -1,441 +1,397 @@
 import { useEffect, useState } from "react";
 import { getReuniones } from "../services/api";
-import { Meeting } from "../types";
+import type { Reunion } from "../types";
 
-const Reuniones: React.FC = () => {
-  const [reuniones, setReuniones] = useState<Meeting[]>([]);
-  const [reunionSeleccionada, setReunionSeleccionada] = useState<Meeting | null>(null);
-  const [showModal, setShowModal] = useState(false);
-  const [loading, setLoading] = useState(false);
+// 👇 Ajusta la ruta según dónde tengas el CSS
+import "../components/Reuniones.css";
 
-  const fetchReuniones = async () => {
-    try {
-      setLoading(true);
-      const data = await getReuniones();
-      console.log("Reuniones desde API:", data);
-      setReuniones(data);
-    } catch (error) {
-      console.error("Error obteniendo reuniones:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+const Reuniones = () => {
+  const [reuniones, setReuniones] = useState<Reunion[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedReunion, setSelectedReunion] = useState<Reunion | null>(null);
 
+  // Cargar reuniones al montar
   useEffect(() => {
-    fetchReuniones();
+    const fetchData = async () => {
+      try {
+        const data = await getReuniones();
+        // Solo reuniones activas
+        const activas = data.filter((r) => r.active);
+        setReuniones(activas);
+      } catch (error) {
+        console.error("Error obteniendo reuniones:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
-  const abrirModal = (reunion: Meeting) => {
-    setReunionSeleccionada(reunion);
-    setShowModal(true);
+  const formatFecha = (dateStr: string) => {
+    if (!dateStr) return "";
+    // Si ya viene "2024-01-14", esto lo vuelve "14/01/2024"
+    const [y, m, d] = dateStr.split("-");
+    if (!y || !m || !d) return dateStr;
+    return `${d}/${m}/${y}`;
   };
 
-  const cerrarModal = () => {
-    setShowModal(false);
-    setReunionSeleccionada(null);
+  const formatHora = (timeStr: string) => {
+    if (!timeStr) return "";
+    // Si viene "09:00:00" o "09:00"
+    return timeStr.slice(0, 5);
   };
 
-  const contarAsistencia = (reunion: Meeting) => {
-    const entries = Object.values(reunion.attendance ?? {});
-    const presentes = entries.filter((a: any) => a.detected).length;
-    const ausentes = entries.filter((a: any) => !a.detected).length;
-    return {
-      presentes,
-      ausentes,
-      total: entries.length,
-    };
+  const estadoBadgeClass = (active: boolean) =>
+    active ? "badge bg-success" : "badge bg-secondary";
+
+  const estadoTexto = (active: boolean) => (active ? "Activa" : "Inactiva");
+
+  const getAttendanceStats = (attendance: Reunion["attendance"]) => {
+    const values = Object.values(attendance || {});
+    const total = values.length;
+    const presentes = values.filter((a) => a.detected).length;
+    const ausentes = total - presentes;
+    return { total, presentes, ausentes };
+  };
+
+  const handleRowClick = (reunion: Reunion) => {
+    setSelectedReunion(reunion);
+  };
+
+  const closeModal = () => {
+    setSelectedReunion(null);
+  };
+
+  const renderTabla = () => {
+    if (loading) {
+      return (
+        <tr>
+          <td colSpan={6} className="text-center">
+            Cargando reuniones...
+          </td>
+        </tr>
+      );
+    }
+
+    if (!loading && reuniones.length === 0) {
+      // No mostramos filas si no hay, dejamos que el “empty state” se encargue
+      return null;
+    }
+
+    return reuniones.map((r) => (
+      <tr key={r.id} onClick={() => handleRowClick(r)}>
+        <td className="fecha-col">{formatFecha(r.date)}</td>
+        <td className="horario-col">
+          {formatHora(r.start_time)} - {formatHora(r.end_time)}
+        </td>
+        <td className="tema-col">{r.title}</td>
+        <td className="ubicacion-col">{r.room || "—"}</td>
+        <td>
+          <span className={estadoBadgeClass(r.active)}>
+            {estadoTexto(r.active)}
+          </span>
+        </td>
+        <td className="text-center">
+          <i className="bi bi-chevron-right"></i>
+        </td>
+      </tr>
+    ));
+  };
+
+  const renderEmptyState = () => {
+    if (loading) return null;
+    if (reuniones.length > 0) return null;
+
+    return (
+      <div className="empty-state">
+        <div className="empty-icon">
+          <i className="bi bi-calendar-x"></i>
+        </div>
+        <h4 className="empty-title">No hay reuniones registradas</h4>
+        <p className="empty-description">
+          Cuando se creen nuevas reuniones, podr&aacute;s ver aqu&iacute; sus
+          detalles, horarios y lista de asistencia.
+        </p>
+      </div>
+    );
+  };
+
+  const renderModal = () => {
+    if (!selectedReunion) return null;
+
+    const { total, presentes, ausentes } = getAttendanceStats(
+      selectedReunion.attendance || {}
+    );
+    const attendanceValues = Object.values(selectedReunion.attendance || {});
+
+    return (
+      <>
+        {/* Fondo oscuro */}
+        <div className="modal-overlay" onClick={closeModal}></div>
+
+        {/* Modal principal */}
+        <div className="modal-ficha-reunion">
+          {/* Header */}
+          <div className="modal-header-custom">
+            <h5 className="modal-title-custom">
+              <i className="bi bi-people me-2"></i>
+              Detalles de la reuni&oacute;n
+            </h5>
+            <button className="btn-close-modal" onClick={closeModal}>
+              <i className="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          {/* Body */}
+          <div className="modal-body-custom">
+            {/* Info principal */}
+            <div className="reunion-info-header mb-4">
+              <h3 className="reunion-tema">{selectedReunion.title}</h3>
+              <div className="reunion-meta">
+                <div className="meta-item">
+                  <i className="bi bi-calendar3 me-2"></i>
+                  {formatFecha(selectedReunion.date)}
+                </div>
+                <div className="meta-item">
+                  <i className="bi bi-clock me-2"></i>
+                  {formatHora(selectedReunion.start_time)} -{" "}
+                  {formatHora(selectedReunion.end_time)}
+                </div>
+                <div className="meta-item">
+                  <i className="bi bi-geo-alt me-2"></i>
+                  {selectedReunion.room || "Sin sala asignada"}
+                </div>
+                <div className="meta-item">
+                  <span className={estadoBadgeClass(selectedReunion.active)}>
+                    {estadoTexto(selectedReunion.active)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="row g-4">
+              {/* Imagen */}
+              <div className="col-md-6">
+                <div className="imagen-section">
+                  <h6 className="section-title">
+                    <i className="bi bi-image me-2"></i>
+                    Captura de asistencia
+                  </h6>
+                  <div className="imagen-container">
+                    <img
+                      className="imagen-reunion"
+                      src={
+                        selectedReunion.image_url ||
+                        "https://via.placeholder.com/800x450?text=Sin+imagen"
+                      }
+                      alt="Imagen de la reunión"
+                    />
+                  </div>
+                  <div className="imagen-info">
+                    Imagen utilizada para el registro de asistencia autom&aacute;tica.
+                  </div>
+                </div>
+              </div>
+
+              {/* Resumen asistencia */}
+              <div className="col-md-6">
+                <div className="resumen-asistencia">
+                  <h6 className="section-title">
+                    <i className="bi bi-person-check me-2"></i>
+                    Resumen de asistencia
+                  </h6>
+                  <div className="resumen-cards">
+                    <div className="resumen-card presente">
+                      <div className="resumen-numero">{presentes}</div>
+                      <div className="resumen-label">Presentes</div>
+                    </div>
+                    <div className="resumen-card ausente">
+                      <div className="resumen-numero">{ausentes}</div>
+                      <div className="resumen-label">Ausentes</div>
+                    </div>
+                    <div className="resumen-card total">
+                      <div className="resumen-numero">{total}</div>
+                      <div className="resumen-label">Total registrados</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Listas presentes / ausentes */}
+              <div className="col-md-6">
+                <div className="asistencia-section">
+                  <h6 className="section-title">
+                    <i className="bi bi-person-lines-fill me-2"></i>
+                    Personas presentes
+                  </h6>
+                  <div className="personas-list">
+                    {attendanceValues.filter((a) => a.detected).length === 0 && (
+                      <p className="text-muted mb-0">
+                        No se registraron presentes.
+                      </p>
+                    )}
+                    {attendanceValues
+                      .filter((a) => a.detected)
+                      .map((a, index) => (
+                        <div
+                          className="persona-item presente-item"
+                          key={`presente-${index}`}
+                        >
+                          <div className="persona-icon">
+                            <i className="bi bi-person-check-fill"></i>
+                          </div>
+                          <div className="persona-info">
+                            <div className="persona-nombre">
+                              Asistente {index + 1}
+                            </div>
+                            <div className="persona-detalle">
+                              Detectado a las{" "}
+                              {a.timestamp
+                                ? new Date(a.timestamp).toLocaleTimeString(
+                                    "es-EC",
+                                    {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    }
+                                  )
+                                : "Hora no registrada"}
+                            </div>
+                          </div>
+                          <div className="persona-estado">
+                            <span className="badge bg-success">Presente</span>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-md-6">
+                <div className="ausencia-section">
+                  <h6 className="section-title">
+                    <i className="bi bi-person-x-fill me-2"></i>
+                    Personas ausentes
+                  </h6>
+                  <div className="personas-list">
+                    {attendanceValues.filter((a) => !a.detected).length ===
+                      0 && (
+                      <p className="text-muted mb-0">
+                        No se registraron ausentes.
+                      </p>
+                    )}
+                    {attendanceValues
+                      .filter((a) => !a.detected)
+                      .map((_, index) => (
+                        <div
+                          className="persona-item ausente-item"
+                          key={`ausente-${index}`}
+                        >
+                          <div className="persona-icon">
+                            <i className="bi bi-person-x-fill"></i>
+                          </div>
+                          <div className="persona-info">
+                            <div className="persona-nombre">
+                              Asistente {index + 1}
+                            </div>
+                            <div className="persona-detalle">
+                              No fue detectado por el sistema.
+                            </div>
+                          </div>
+                          <div className="persona-estado">
+                            <span className="badge bg-danger">Ausente</span>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Observaciones */}
+              <div className="col-12">
+                <div className="observaciones-section">
+                  <h6 className="section-title">
+                    <i className="bi bi-card-text me-2"></i>
+                    Observaciones
+                  </h6>
+                  <div className="observaciones-content">
+                    {selectedReunion.observations &&
+                    selectedReunion.observations.trim() !== ""
+                      ? selectedReunion.observations
+                      : "No se registraron observaciones adicionales para esta reunión."}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="modal-footer-custom">
+            <button className="btn btn-outline-secondary" onClick={closeModal}>
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </>
+    );
   };
 
   return (
-    <div className="reuniones-container py-4">
-      <div className="container">
+    <div className="reuniones-container">
+      <div className="container py-4">
         {/* HEADER */}
-        <div className="d-flex justify-content-between align-items-start page-header mb-4">
-          <div>
-            <h2 className="page-title d-flex align-items-center">
-              <i className="bi bi-calendar-event me-2"></i>
-              Gestión de Reuniones
-            </h2>
-            <p className="page-subtitle">
-              Registro y seguimiento de reuniones académicas
-            </p>
-          </div>
+        <div className="page-header mb-4">
+          <div className="d-flex justify-content-between align-items-center">
+            <div>
+              <h2 className="page-title">
+                <i className="bi bi-calendar-check me-2"></i>
+                Reuniones
+              </h2>
+              <p className="page-subtitle">
+                Gestión de reuniones y control de asistencia con Robby.
+              </p>
+            </div>
 
-          <button
-            className="btn btn-add-reunion d-flex align-items-center"
-            type="button"
-            onClick={() => alert("Crear reunión: pendiente de implementar")}
-          >
-            <i className="bi bi-plus-lg me-2"></i>
-            Nueva Reunión
-          </button>
+            <button
+              type="button"
+              className="btn-add-reunion"
+              // Aquí en el futuro puedes abrir un modal para crear reunión
+              onClick={() => alert("Formulario de creación de reunión (futuro)")}
+            >
+              <i className="bi bi-plus-circle me-2"></i>
+              Nueva reunión
+            </button>
+          </div>
         </div>
 
-        {/* CONTENIDO PRINCIPAL */}
-        {loading ? (
-          <div className="text-center mt-5">
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Cargando...</span>
+        {/* TABLA + EMPTY STATE */}
+        <div className="table-section">
+          <div className="table-container">
+            <div className="table-responsive">
+              <table className="table reuniones-table mb-0">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Horario</th>
+                    <th>Tema</th>
+                    <th>Ubicación</th>
+                    <th>Estado</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>{renderTabla()}</tbody>
+              </table>
             </div>
-            <p className="mt-3 text-muted">Cargando reuniones...</p>
+
+            {renderEmptyState()}
           </div>
-        ) : reuniones.length === 0 ? (
-          // ESTADO VACÍO (NO HAY REUNIONES EN BD)
-          <div className="empty-state mt-5">
-            <div className="empty-icon">
-              <i className="bi bi-calendar-x"></i>
-            </div>
-            <h4 className="empty-title">No hay reuniones registradas</h4>
-            <p className="empty-description">
-              Aún no se ha registrado ninguna reunión académica.
-              Utiliza el botón <strong>"Nueva Reunión"</strong> para crear la primera.
-            </p>
-          </div>
-        ) : (
-          // LISTA DE REUNIONES (TODO VIENE DESDE LA BD)
-          <div className="card shadow-sm mt-3 table-section">
-            <div className="card-body table-container">
-              {reuniones.map((r) => {
-                const { presentes, ausentes } = contarAsistencia(r);
-
-                return (
-                  <div
-                    key={r.id}
-                    className="d-flex justify-content-between align-items-center py-3 border-bottom reunion-row"
-                    onClick={() => abrirModal(r)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    {/* Fecha */}
-                    <div className="fecha-col">
-                      <div className="text-muted small">Fecha</div>
-                      <div className="fw-semibold">
-                        {new Date(r.date).toLocaleDateString("es-EC", {
-                          day: "2-digit",
-                          month: "long",
-                          year: "numeric",
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Tema / Título */}
-                    <div className="tema-col flex-grow-1 ms-3">
-                      <div className="text-muted small">Tema</div>
-                      <div className="fw-semibold">{r.title}</div>
-                    </div>
-
-                    {/* Horario */}
-                    <div className="horario-col ms-3">
-                      <div className="text-muted small">Horario</div>
-                      <div className="fw-semibold">
-                        {r.start_time} - {r.end_time}
-                      </div>
-                    </div>
-
-                    {/* Ubicación */}
-                    <div className="ubicacion-col ms-3">
-                      <div className="text-muted small">Ubicación</div>
-                      <div className="fw-semibold">{r.room}</div>
-                    </div>
-
-                    {/* Resumen asistencia */}
-                    <div className="ms-3 d-flex align-items-center gap-2">
-                      <span className="badge bg-success">
-                        {presentes} presentes
-                      </span>
-                      <span className="badge bg-danger">
-                        {ausentes} ausentes
-                      </span>
-                    </div>
-
-                    {/* Estado de la reunión */}
-                    <div className="ms-3">
-                      <span
-                        className={`badge ${
-                          r.active ? "bg-success" : "bg-secondary"
-                        }`}
-                      >
-                        {r.active ? "Activa" : "Inactiva"}
-                      </span>
-                    </div>
-
-                    {/* Botón Ver Detalles */}
-                    <div className="ms-3">
-                      <button
-                        className="btn btn-outline-primary btn-sm"
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation(); // que no dispare el onClick de la fila
-                          abrirModal(r);
-                        }}
-                      >
-                        <i className="bi bi-eye me-1"></i>
-                        Ver Detalles
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* MODAL DE DETALLES DE LA REUNIÓN */}
-        {showModal && reunionSeleccionada && (
-          <>
-            <div className="modal-overlay" onClick={cerrarModal} />
-            <div className="modal-ficha-reunion">
-              {/* Header del modal */}
-              <div className="modal-header-custom">
-                <h5 className="modal-title-custom">
-                  <i className="bi bi-journal-text me-2"></i>
-                  {reunionSeleccionada.title}
-                </h5>
-                <button
-                  type="button"
-                  className="btn-close-modal"
-                  onClick={cerrarModal}
-                >
-                  <i className="bi bi-x-lg"></i>
-                </button>
-              </div>
-
-              {/* Body del modal */}
-              <div className="modal-body-custom">
-                {/* Info general de la reunión */}
-                <div className="reunion-info-header mb-4">
-                  <div className="reunion-tema">
-                    {reunionSeleccionada.title}
-                  </div>
-                  <p className="mb-3 text-muted">
-                    {reunionSeleccionada.description || "Sin descripción."}
-                  </p>
-                  <div className="reunion-meta">
-                    <div className="meta-item">
-                      <i className="bi bi-calendar3 me-2"></i>
-                      {new Date(reunionSeleccionada.date).toLocaleDateString(
-                        "es-EC",
-                        { day: "2-digit", month: "long", year: "numeric" }
-                      )}
-                    </div>
-                    <div className="meta-item">
-                      <i className="bi bi-clock me-2"></i>
-                      {reunionSeleccionada.start_time} -{" "}
-                      {reunionSeleccionada.end_time}
-                    </div>
-                    <div className="meta-item">
-                      <i className="bi bi-geo-alt me-2"></i>
-                      {reunionSeleccionada.room}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="row g-4">
-                  {/* Imagen de la reunión */}
-                  <div className="col-md-6">
-                    <div className="imagen-section">
-                      <div className="section-title">
-                        <i className="bi bi-camera me-2"></i>
-                        Imagen Registrada por el Robot
-                      </div>
-                      <div className="imagen-container">
-                        <img
-                          className="imagen-reunion"
-                          src={
-                            reunionSeleccionada.image_url ||
-                            "https://via.placeholder.com/800x400?text=Sin+imagen+registrada"
-                          }
-                          alt="Imagen de la reunión"
-                        />
-                      </div>
-                      <div className="imagen-info">
-                        {reunionSeleccionada.image_url
-                          ? "Capturada automáticamente"
-                          : "Sin imagen disponible"}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Resumen y listas de asistencia */}
-                  <div className="col-md-6">
-                    {/* Resumen asistencia */}
-                    <div className="resumen-asistencia mb-4">
-                      <div className="section-title">
-                        <i className="bi bi-people me-2"></i>
-                        Resumen de Asistencia
-                      </div>
-                      {(() => {
-                        const entries = Object.entries(
-                          reunionSeleccionada.attendance ?? {}
-                        );
-                        const presentes = entries.filter(
-                          ([, a]: any) => a.detected
-                        );
-                        const ausentes = entries.filter(
-                          ([, a]: any) => !a.detected
-                        );
-
-                        return (
-                          <div className="resumen-cards">
-                            <div className="resumen-card presente">
-                              <div className="resumen-numero">
-                                {presentes.length}
-                              </div>
-                              <div className="resumen-label">Presentes</div>
-                            </div>
-                            <div className="resumen-card ausente">
-                              <div className="resumen-numero">
-                                {ausentes.length}
-                              </div>
-                              <div className="resumen-label">Ausentes</div>
-                            </div>
-                            <div className="resumen-card total">
-                              <div className="resumen-numero">
-                                {entries.length}
-                              </div>
-                              <div className="resumen-label">Total</div>
-                            </div>
-                          </div>
-                        );
-                      })()}
-                    </div>
-
-                    {/* Listas de personas */}
-                    {(() => {
-                      const entries = Object.entries(
-                        reunionSeleccionada.attendance ?? {}
-                      );
-                      const presentes = entries.filter(
-                        ([, a]: any) => a.detected
-                      );
-                      const ausentes = entries.filter(
-                        ([, a]: any) => !a.detected
-                      );
-
-                      return (
-                        <>
-                          {/* Presentes */}
-                          <div className="asistencia-section mb-4">
-                            <div className="section-title">
-                              <i className="bi bi-person-check me-2"></i>
-                              Personas que Asistieron
-                            </div>
-                            {presentes.length === 0 ? (
-                              <p className="text-muted mb-0">
-                                No hay registros de personas presentes.
-                              </p>
-                            ) : (
-                              <div className="personas-list">
-                                {presentes.map(([userId, a]: any, idx) => (
-                                  <div
-                                    key={userId}
-                                    className="persona-item presente-item"
-                                  >
-                                    <div className="persona-icon">
-                                      <i className="bi bi-check-circle"></i>
-                                    </div>
-                                    <div className="persona-info">
-                                      <div className="persona-nombre">
-                                        Participante {idx + 1}
-                                      </div>
-                                      <div className="persona-detalle">
-                                        ID: {userId} · Llegada:{" "}
-                                        {a.timestamp || "No registrada"}
-                                      </div>
-                                    </div>
-                                    <div className="persona-estado">
-                                      <span className="badge bg-success">
-                                        Presente
-                                      </span>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Ausentes */}
-                          <div className="ausencia-section mb-4">
-                            <div className="section-title">
-                              <i className="bi bi-person-x me-2"></i>
-                              Personas que NO Asistieron
-                            </div>
-                            {ausentes.length === 0 ? (
-                              <p className="text-muted mb-0">
-                                No hay registros de personas ausentes.
-                              </p>
-                            ) : (
-                              <div className="personas-list">
-                                {ausentes.map(([userId, a]: any, idx) => (
-                                  <div
-                                    key={userId}
-                                    className="persona-item ausente-item"
-                                  >
-                                    <div className="persona-icon">
-                                      <i className="bi bi-x-circle"></i>
-                                    </div>
-                                    <div className="persona-info">
-                                      <div className="persona-nombre">
-                                        Participante {idx + 1}
-                                      </div>
-                                      <div className="persona-detalle">
-                                        ID: {userId} · No registrado
-                                      </div>
-                                    </div>
-                                    <div className="persona-estado">
-                                      <span className="badge bg-danger">
-                                        Ausente
-                                      </span>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </>
-                      );
-                    })()}
-                  </div>
-                </div>
-
-                {/* Observaciones */}
-                <div className="observaciones-section mt-3">
-                  <div className="section-title">
-                    <i className="bi bi-chat-square-text me-2"></i>
-                    Observaciones
-                  </div>
-                  <div className="observaciones-content">
-                    {reunionSeleccionada.observations ||
-                      "Sin observaciones registradas para esta reunión."}
-                  </div>
-                </div>
-              </div>
-
-              {/* Footer del modal */}
-              <div className="modal-footer-custom">
-                <button
-                  className="btn btn-secondary"
-                  type="button"
-                  onClick={cerrarModal}
-                >
-                  <i className="bi bi-x-lg me-2"></i>
-                  Cerrar
-                </button>
-                <button
-                  className="btn btn-primary"
-                  type="button"
-                  onClick={() => alert("Descargar reporte: pendiente")}
-                >
-                  <i className="bi bi-download me-2"></i>
-                  Descargar Reporte
-                </button>
-              </div>
-            </div>
-          </>
-        )}
+        </div>
       </div>
+
+      {/* MODAL */}
+      {renderModal()}
     </div>
   );
 };
 
 export default Reuniones;
-

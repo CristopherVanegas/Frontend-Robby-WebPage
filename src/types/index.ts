@@ -18,18 +18,25 @@ export interface AttendanceEntry {
   timestamp: string | null;
 }
 
-export interface Meeting {
+export interface Reunion {
   id: string;
   title: string;
   description?: string;
-  date: string;          // en backend es date, aquí lo tratamos como string
-  start_time: string;    // "09:00"
-  end_time: string;      // "11:00"
-  room: string;
+  date: string;        // "2024-01-14"
+  start_time: string;  // "09:00"
+  end_time: string;    // "11:00"
+  room?: string | null;
   image_url?: string | null;
   observations?: string;
   active: boolean;
-  attendance: {
-    [userId: string]: AttendanceEntry;
-  };
+  attendance: Record<
+    string,
+    {
+      detected: boolean;
+      timestamp: string | null;
+      // Opcional: para futuro si unes con usuarios
+      full_name?: string;
+      email?: string;
+    }
+  >;
 }
