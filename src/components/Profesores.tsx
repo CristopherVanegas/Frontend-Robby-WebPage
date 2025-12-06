@@ -2,94 +2,109 @@ import { useEffect, useState } from "react";
 import { getProfesores, deleteProfesor } from "../services/api";
 import AddProfesorForm from "./AddProfesorForm";
 import EditProfesorForm from "./EditProfesorForm";
+import { Profesor } from "../types";
 
-interface Profesor {
-  id_usuario: string;
-  first_name: string;
-  second_name?: string;
-  surname1: string;
-  surname2?: string;
-  email: string;
-  active: boolean;
-}
 
 const Profesores = () => {
   const [profesores, setProfesores] = useState<Profesor[]>([]);
-  const [showAdd, setShowAdd] = useState(false);
-  const [editData, setEditData] = useState<Profesor | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingProfesor, setEditingProfesor] = useState<Profesor | null>(null);
 
-  const loadProfesores = async () => {
-    const data = await getProfesores();
-    setProfesores(data);
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm("¿Seguro que deseas desactivar este profesor?")) return;
-    await deleteProfesor(id);
-    loadProfesores();
+  const fetchProfesores = async () => {
+    try {
+      const data = await getProfesores();
+      setProfesores(data);
+    } catch (error) {
+      console.error("Error obteniendo profesores:", error);
+    }
   };
 
   useEffect(() => {
-    loadProfesores();
+    fetchProfesores();
   }, []);
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm("¿Seguro que deseas eliminar (desactivar) este profesor?")) {
+      return;
+    }
+
+    try {
+      await deleteProfesor(id);
+      fetchProfesores();
+    } catch (error) {
+      console.error("Error eliminando profesor:", error);
+    }
+  };
+
+  const handleEditClick = (profesor: Profesor) => {
+    setEditingProfesor(profesor);
+    setShowAddForm(false);
+  };
+
+  const handleAddClick = () => {
+    setShowAddForm(true);
+    setEditingProfesor(null);
+  };
 
   return (
     <div className="container mt-4">
-      <h2 className="mb-3">Profesores</h2>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h3>Profesores</h3>
+        <button className="btn btn-primary" onClick={handleAddClick}>
+          Añadir Profesor
+        </button>
+      </div>
 
-      <button
-        className="btn btn-primary mb-3"
-        onClick={() => setShowAdd(true)}
-      >
-        Añadir Profesor
-      </button>
-
-      {/* FORMULARIO AGREGAR */}
-      {showAdd && (
+      {/* Formulario de Añadir */}
+      {showAddForm && (
         <AddProfesorForm
-          onClose={() => setShowAdd(false)}
-          refresh={loadProfesores}
+          onClose={() => setShowAddForm(false)}
+          refresh={fetchProfesores}
         />
       )}
 
-      {/* FORMULARIO EDITAR */}
-      {editData && (
+      {/* Formulario de Editar */}
+      {editingProfesor && (
         <EditProfesorForm
-          profesor={editData}
-          onClose={() => setEditData(null)}
-          refresh={loadProfesores}
+          profesor={editingProfesor}
+          onClose={() => setEditingProfesor(null)}
+          refresh={fetchProfesores}
         />
       )}
 
+      {/* Tabla de profesores */}
       <table className="table table-striped">
         <thead>
           <tr>
             <th>Nombre</th>
             <th>Apellido</th>
             <th>Email</th>
+            <th>Rol</th>
             <th>Estado</th>
             <th></th>
           </tr>
         </thead>
-
         <tbody>
           {profesores.map((p) => (
             <tr key={p.id_usuario}>
-              <td>{p.first_name} {p.second_name}</td>
-              <td>{p.surname1} {p.surname2}</td>
+              <td>
+                {p.first_name} {p.second_name}
+              </td>
+              <td>
+                {p.surname1} {p.surname2}
+              </td>
               <td>{p.email}</td>
+              <td>{p.rol_id ?? "—"}</td>
               <td>{p.active ? "Activo" : "Inactivo"}</td>
-
               <td>
                 <button
-                  className="btn btn-warning btn-sm me-2"
-                  onClick={() => setEditData(p)}
+                  className="btn btn-sm btn-warning me-2"
+                  onClick={() => handleEditClick(p)}
                 >
                   Editar
                 </button>
-
                 <button
-                  className="btn btn-danger btn-sm"
+                  className="btn btn-sm btn-danger"
                   onClick={() => handleDelete(p.id_usuario)}
                 >
                   Eliminar
@@ -97,6 +112,13 @@ const Profesores = () => {
               </td>
             </tr>
           ))}
+          {profesores.length === 0 && (
+            <tr>
+              <td colSpan={6} className="text-center">
+                No hay profesores registrados.
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>

@@ -6,22 +6,33 @@ interface Props {
   refresh: () => void;
 }
 
+interface ProfesorFormData {
+  first_name: string;
+  second_name: string;
+  surname1: string;
+  surname2: string;
+  email: string;
+  username: string;
+  rol_id: string;
+  password: string;
+}
+
 const AddProfesorForm = ({ onClose, refresh }: Props) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ProfesorFormData>({
     first_name: "",
     second_name: "",
     surname1: "",
     surname2: "",
     email: "",
     username: "",
-    rol_id: "docente",
+    rol_id: "docente", // valor por defecto
     password: "123456",
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // -----------------------------------
-  // VALIDACIÓN POR CAMPO
+  // VALIDAR CAMPO INDIVIDUAL
   // -----------------------------------
   const validateField = (name: string, value: string): string => {
     switch (name) {
@@ -42,6 +53,10 @@ const AddProfesorForm = ({ onClose, refresh }: Props) => {
       case "username":
         if (!value.trim()) return "El nombre de usuario es obligatorio.";
         break;
+
+      case "rol_id":
+        if (!value.trim()) return "El rol es obligatorio.";
+        break;
     }
     return "";
   };
@@ -53,7 +68,7 @@ const AddProfesorForm = ({ onClose, refresh }: Props) => {
     const newErrors: Record<string, string> = {};
 
     for (const [key, value] of Object.entries(formData)) {
-      const err = validateField(key, value);
+      const err = validateField(key, value as string);
       if (err) newErrors[key] = err;
     }
 
@@ -64,14 +79,18 @@ const AddProfesorForm = ({ onClose, refresh }: Props) => {
   // -----------------------------------
   // HANDLE CHANGE
   // -----------------------------------
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
 
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // validación inmediata
-    const err = validateField(name, value);
-    setErrors((prev) => ({ ...prev, [name]: err }));
+    // validación on-change opcional
+    if (errors[name]) {
+      const err = validateField(name, value);
+      setErrors((prev) => ({ ...prev, [name]: err }));
+    }
   };
 
   // -----------------------------------
@@ -86,20 +105,19 @@ const AddProfesorForm = ({ onClose, refresh }: Props) => {
       await createProfesor(formData);
       refresh();
       onClose();
-    } catch (error: any) {
-      console.error("API ERROR:", error);
-
-      if (error.response?.data?.detail) {
-        const detail = error.response.data.detail;
-
-        if (Array.isArray(detail) && detail.length > 0 && detail[0].msg) {
-          alert("Error: " + detail[0].msg);
-        } else {
-          alert("Error del servidor: " + detail);
-        }
-      } else {
-        alert("No se pudo conectar al servidor.");
-      }
+      setFormData({
+        first_name: "",
+        second_name: "",
+        surname1: "",
+        surname2: "",
+        email: "",
+        username: "",
+        rol_id: "docente",
+        password: "123456",
+      });
+      setErrors({});
+    } catch (error) {
+      console.error("Error creando profesor:", error);
     }
   };
 
@@ -116,12 +134,19 @@ const AddProfesorForm = ({ onClose, refresh }: Props) => {
           <input
             name="first_name"
             className={`form-control ${
-              errors.first_name ? "is-invalid" : formData.first_name ? "is-valid" : ""
+              errors.first_name
+                ? "is-invalid"
+                : formData.first_name
+                ? "is-valid"
+                : ""
             }`}
             placeholder="Nombre"
+            value={formData.first_name}
             onChange={handleChange}
           />
-          {errors.first_name && <div className="invalid-feedback">{errors.first_name}</div>}
+          {errors.first_name && (
+            <div className="invalid-feedback">{errors.first_name}</div>
+          )}
         </div>
 
         {/* Segundo nombre */}
@@ -130,6 +155,7 @@ const AddProfesorForm = ({ onClose, refresh }: Props) => {
             name="second_name"
             className="form-control"
             placeholder="Segundo Nombre"
+            value={formData.second_name}
             onChange={handleChange}
           />
         </div>
@@ -139,12 +165,19 @@ const AddProfesorForm = ({ onClose, refresh }: Props) => {
           <input
             name="surname1"
             className={`form-control ${
-              errors.surname1 ? "is-invalid" : formData.surname1 ? "is-valid" : ""
+              errors.surname1
+                ? "is-invalid"
+                : formData.surname1
+                ? "is-valid"
+                : ""
             }`}
             placeholder="Primer Apellido"
+            value={formData.surname1}
             onChange={handleChange}
           />
-          {errors.surname1 && <div className="invalid-feedback">{errors.surname1}</div>}
+          {errors.surname1 && (
+            <div className="invalid-feedback">{errors.surname1}</div>
+          )}
         </div>
 
         {/* Segundo apellido */}
@@ -153,6 +186,7 @@ const AddProfesorForm = ({ onClose, refresh }: Props) => {
             name="surname2"
             className="form-control"
             placeholder="Segundo Apellido"
+            value={formData.surname2}
             onChange={handleChange}
           />
         </div>
@@ -165,9 +199,12 @@ const AddProfesorForm = ({ onClose, refresh }: Props) => {
               errors.email ? "is-invalid" : formData.email ? "is-valid" : ""
             }`}
             placeholder="Correo Electrónico"
+            value={formData.email}
             onChange={handleChange}
           />
-          {errors.email && <div className="invalid-feedback">{errors.email}</div>}
+          {errors.email && (
+            <div className="invalid-feedback">{errors.email}</div>
+          )}
         </div>
 
         {/* Username */}
@@ -175,18 +212,48 @@ const AddProfesorForm = ({ onClose, refresh }: Props) => {
           <input
             name="username"
             className={`form-control ${
-              errors.username ? "is-invalid" : formData.username ? "is-valid" : ""
+              errors.username
+                ? "is-invalid"
+                : formData.username
+                ? "is-valid"
+                : ""
             }`}
             placeholder="Usuario"
+            value={formData.username}
             onChange={handleChange}
           />
-          {errors.username && <div className="invalid-feedback">{errors.username}</div>}
+          {errors.username && (
+            <div className="invalid-feedback">{errors.username}</div>
+          )}
+        </div>
+
+        {/* Rol */}
+        <div className="mb-3">
+          <select
+            name="rol_id"
+            className={`form-select ${errors.rol_id ? "is-invalid" : ""}`}
+            value={formData.rol_id}
+            onChange={handleChange}
+          >
+            <option value="">Seleccione un rol</option>
+            <option value="docente">Docente</option>
+            <option value="decano">Decana/o</option>
+            <option value="coordinador">Coordinador</option>
+            <option value="administrativo">Administrativo</option>
+          </select>
+          {errors.rol_id && (
+            <div className="invalid-feedback">{errors.rol_id}</div>
+          )}
         </div>
 
         <button className="btn btn-success me-2" type="submit">
           Guardar
         </button>
-        <button className="btn btn-secondary" type="button" onClick={onClose}>
+        <button
+          className="btn btn-secondary"
+          type="button"
+          onClick={onClose}
+        >
           Cancelar
         </button>
       </form>
