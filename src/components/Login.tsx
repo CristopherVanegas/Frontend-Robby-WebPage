@@ -1,92 +1,100 @@
-import { useState } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "./Login.css";
+import { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import './Login.css';
 
-const Login = () => {
-  const [user, setUser] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+export default function Login() {
+  const { login } = useAuth();
+  const [formData, setFormData] = useState({
+    username: '',
+    password: ''
+  });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    setLoading(true);
 
-    // 🔥 LOGIN QUEMADO (sin backend)
-    if (user === "admin" && password === "123") {
-      // 🔥 Redirige correctamente al Home
-      window.location.href = "/Home";
-    } else {
-      setError("Usuario o contraseña incorrectos");
+    try {
+      await login(formData.username, formData.password);
+    } catch (err: any) {
+      setError(err.message || 'Error al iniciar sesión');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="login-container d-flex justify-content-center align-items-center vh-100">
-      <div className="login-card card p-5 shadow-lg">
-        {/* Logo ECOTEC */}
-        <div className="text-center mb-4">
-          <img 
-            src="./assets/ecotec_logolargo.png" 
-            alt="Logo ECOTEC" 
-            className="logo-ecotec mb-3"
-          />
-          <h3 className="title-login">Iniciar Sesión</h3>
-          <p className="subtitle-login">Accede a tu cuenta</p>
+    <div className="login-container">
+      <div className="login-card">
+        <div className="login-header">
+          <div className="login-logo">🎓</div>
+          <h1 className="login-title">Sistema Académico</h1>
+          <p className="login-subtitle">ECOTEC</p>
         </div>
 
-        {error && (
-          <div className="alert alert-danger alert-modern" role="alert">
-            <i className="bi bi-exclamation-circle me-2"></i>
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleLogin}>
-          <div className="mb-4">
-            <label className="form-label label-modern">Usuario</label>
-            <div className="input-group-modern">
-              <span className="input-icon">
-                <i className="bi bi-person-fill"></i>
-              </span>
-              <input
-                type="text"
-                className="form-control modern-input"
-                value={user}
-                onChange={(e) => setUser(e.target.value)}
-                placeholder="Ingresa tu usuario"
-                required
-              />
+        <div className="login-body">
+          {error && (
+            <div className="alert-error">
+              <i className="bi bi-exclamation-triangle-fill"></i>
+              <span>{error}</span>
             </div>
-          </div>
+          )}
 
-          <div className="mb-4">
-            <label className="form-label label-modern">Contraseña</label>
-            <div className="input-group-modern">
-              <span className="input-icon">
-                <i className="bi bi-lock-fill"></i>
-              </span>
-              <input
-                type="password"
-                className="form-control modern-input"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Ingresa tu contraseña"
-                required
-              />
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label className="form-label">Usuario</label>
+              <div className="input-group">
+                <i className="bi bi-person-fill input-icon"></i>
+                <input
+                  type="text"
+                  className="form-control-login with-icon"
+                  value={formData.username}
+                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                  placeholder="Ingresa tu usuario"
+                  required
+                  autoFocus
+                />
+              </div>
             </div>
-          </div>
 
-          <button type="submit" className="btn login-btn w-100 mt-3">
-            <span className="btn-text">Entrar</span>
-            <i className="bi bi-arrow-right ms-2"></i>
-          </button>
-        </form>
+            <div className="form-group">
+              <label className="form-label">Contraseña</label>
+              <div className="input-group">
+                <i className="bi bi-lock-fill input-icon"></i>
+                <input
+                  type="password"
+                  className="form-control-login with-icon"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  placeholder="Ingresa tu contraseña"
+                  required
+                />
+              </div>
+            </div>
 
-        <div className="text-center mt-4">
-          <a href="#" className="forgot-password">¿Olvidaste tu contraseña?</a>
+            <button type="submit" className="btn-login" disabled={loading}>
+              {loading ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2"></span>
+                  Iniciando sesión...
+                </>
+              ) : (
+                <>
+                  <i className="bi bi-box-arrow-in-right me-2"></i>
+                  Iniciar Sesión
+                </>
+              )}
+            </button>
+          </form>
+        </div>
+
+        <div className="login-footer">
+          <p className="login-footer-text">Sistema de Gestión Académica</p>
+          <div className="universidad-badge">Universidad ECOTEC</div>
         </div>
       </div>
     </div>
   );
-};
-
-export default Login;
+}
